@@ -1,5 +1,36 @@
 import { ParsedOutput } from '@/types';
 
+/** Split prompt blocks separated by horizontal rules or numbering */
+function parsePromptList(content: string): string[] {
+  // Split by separator lines (─── or ═══) or numbered entries
+  const blocks = content
+    .split(/\n*[─═]{3,}\n*/)
+    .map(b => b.trim())
+    .filter(b => b.length > 0 && !/^\(\d+ total\)$/i.test(b));
+
+  if (blocks.length > 1) {
+    return blocks;
+  }
+
+  // Fallback: split by numbered entries like "Image 1:" or "Video Prompt 1:"
+  const numbered = content
+    .split(/\n(?=(?:Image|Video)\s*(?:Prompt\s*)?\d+\s*:)/i)
+    .map(b => b.trim())
+    .filter(b => b.length > 0);
+
+  if (numbered.length > 1) {
+    return numbered;
+  }
+
+  // Fallback: numbered list
+  const list = content
+    .split(/\n(?=\d+[\.\)])/)
+    .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
+    .filter(l => l.length > 0);
+
+  return list.length > 0 ? list : content.split('\n\n').filter(l => l.trim().length > 0);
+}
+
 export function parseOutput(raw: string): ParsedOutput {
   const result: ParsedOutput = {
     channelDNA: '',
@@ -104,23 +135,11 @@ export function parseOutput(raw: string): ParsedOutput {
         break;
       }
       case 'imagePrompts': {
-        result.imagePrompts = content
-          .split(/\n(?=\d+[\.\)])/)
-          .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
-          .filter(l => l.length > 0);
-        if (result.imagePrompts.length === 0) {
-          result.imagePrompts = content.split('\n\n').filter(l => l.trim().length > 0);
-        }
+        result.imagePrompts = parsePromptList(content);
         break;
       }
       case 'videoPrompts': {
-        result.videoPrompts = content
-          .split(/\n(?=\d+[\.\)])/)
-          .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
-          .filter(l => l.length > 0);
-        if (result.videoPrompts.length === 0) {
-          result.videoPrompts = content.split('\n\n').filter(l => l.trim().length > 0);
-        }
+        result.videoPrompts = parsePromptList(content);
         break;
       }
     }
