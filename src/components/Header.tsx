@@ -12,7 +12,7 @@ import {
 
 const WEBHOOK_KEY = 'ghibli-days-webhook-url';
 
-const DEFAULT_WEBHOOK = 'https://n8n.zaicondigital.com/webhook-test/ghibliautomation';
+const DEFAULT_WEBHOOK = 'https://n8n.zaicondigital.com/webhook/ghibliautomation';
 
 export function getWebhookUrl(): string {
   return localStorage.getItem(WEBHOOK_KEY) || DEFAULT_WEBHOOK;
