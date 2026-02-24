@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
-import { Copy, Download, RotateCcw, Check, Dna, Sparkles, BookOpen, Users, Palette, Film } from 'lucide-react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Copy, Download, RotateCcw, Check, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ParsedOutput } from '@/types';
 import { generateDownloadText } from '@/lib/parseOutput';
@@ -103,6 +104,26 @@ const sectionNav = [
 ];
 
 const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return parsed;
+    const match = (s: string) => s.toLowerCase().includes(q);
+    return {
+      ...parsed,
+      channelDNA: match(parsed.channelDNA) ? parsed.channelDNA : '',
+      channelDNAJson: parsed.channelDNAJson && match(parsed.channelDNAJson) ? parsed.channelDNAJson : null,
+      titles: parsed.titles.filter(match),
+      story: match(parsed.story) ? parsed.story : '',
+      characters: parsed.characters.filter(c => match(c.label) || match(c.description)),
+      imagePrompts: parsed.imagePrompts.filter(match),
+      videoPrompts: parsed.videoPrompts.filter(match),
+    };
+  }, [parsed, searchQuery]);
+
+  const totalResults = filtered.titles.length + filtered.imagePrompts.length + filtered.videoPrompts.length + filtered.characters.length + (filtered.story ? 1 : 0) + (filtered.channelDNA ? 1 : 0);
+
   const handleCopyAll = useCallback(() => {
     navigator.clipboard.writeText(parsed.raw);
     toast({ title: 'Copied!', description: 'All content copied to clipboard.' });
@@ -148,6 +169,30 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         </Button>
       </div>
 
+      {/* Search bar */}
+      <div className="mb-6 relative max-w-md mx-auto">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search titles, prompts, characters…"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="pl-9 pr-9 font-ui text-sm"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      {searchQuery && (
+        <p className="mb-4 text-center font-ui text-xs text-muted-foreground">
+          {totalResults} result{totalResults !== 1 ? 's' : ''} for "{searchQuery}"
+        </p>
+      )}
+
       {/* Section nav */}
       <div className="mb-8 flex flex-wrap items-center justify-center gap-2">
         {sectionNav.map(s => (
@@ -166,35 +211,35 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       <Accordion type="multiple" defaultValue={['channel-dna', 'titles', 'story', 'characters', 'image-prompts', 'video-prompts']}>
 
         {/* Channel DNA */}
-        {parsed.channelDNA && (
+        {filtered.channelDNA && (
           <AccordionItem value="channel-dna" id="channel-dna" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2"><Dna className="h-5 w-5 text-primary" /> Channel DNA Analysis</span>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="flex justify-end mb-2"><CopyBtn text={parsed.channelDNA} /></div>
+              <div className="flex justify-end mb-2"><CopyBtn text={filtered.channelDNA} /></div>
               <div className="whitespace-pre-wrap font-body text-sm leading-relaxed text-foreground">
-                {parsed.channelDNA}
+                {filtered.channelDNA}
               </div>
-              {parsed.channelDNAJson && (
-                <pre className="code-block mt-4 text-xs">{parsed.channelDNAJson}</pre>
+              {filtered.channelDNAJson && (
+                <pre className="code-block mt-4 text-xs">{filtered.channelDNAJson}</pre>
               )}
             </AccordionContent>
           </AccordionItem>
         )}
 
         {/* Titles */}
-        {parsed.titles.length > 0 && (
+        {filtered.titles.length > 0 && (
           <AccordionItem value="titles" id="titles" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-secondary-foreground" /> Titles
-                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.titles.length})</span>
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({filtered.titles.length})</span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid gap-2 sm:grid-cols-2">
-                {parsed.titles.map((title, i) => (
+                {filtered.titles.map((title, i) => (
                   <div key={i} className="flex items-center justify-between gap-2 rounded-md border border-border/50 bg-background/50 px-3 py-2.5">
                     <span className="font-body text-sm leading-snug">
                       <span className="font-ui text-xs font-bold text-muted-foreground mr-2">{i + 1}.</span>
@@ -209,30 +254,30 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         )}
 
         {/* Story */}
-        {parsed.story && (
+        {filtered.story && (
           <AccordionItem value="story" id="story" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary" /> Story</span>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="flex justify-end mb-3"><CopyBtn text={parsed.story} /></div>
-              <StoryContent text={parsed.story} />
+              <div className="flex justify-end mb-3"><CopyBtn text={filtered.story} /></div>
+              <StoryContent text={filtered.story} />
             </AccordionContent>
           </AccordionItem>
         )}
 
         {/* Characters */}
-        {parsed.characters.length > 0 && (
+        {filtered.characters.length > 0 && (
           <AccordionItem value="characters" id="characters" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" /> Characters
-                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.characters.length})</span>
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({filtered.characters.length})</span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {parsed.characters.map((char, i) => (
+                {filtered.characters.map((char, i) => (
                   <CharacterCard key={i} char={char} />
                 ))}
               </div>
@@ -241,17 +286,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         )}
 
         {/* Image Prompts */}
-        {parsed.imagePrompts.length > 0 && (
+        {filtered.imagePrompts.length > 0 && (
           <AccordionItem value="image-prompts" id="image-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" /> Image Prompts
-                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.imagePrompts.length})</span>
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({filtered.imagePrompts.length})</span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-3">
-                {parsed.imagePrompts.map((prompt, i) => (
+                {filtered.imagePrompts.map((prompt, i) => (
                   <PromptCard key={i} prompt={prompt} index={i} type="image" />
                 ))}
               </div>
@@ -260,17 +305,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         )}
 
         {/* Video Prompts */}
-        {parsed.videoPrompts.length > 0 && (
+        {filtered.videoPrompts.length > 0 && (
           <AccordionItem value="video-prompts" id="video-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
             <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
               <span className="flex items-center gap-2">
                 <Film className="h-5 w-5 text-primary" /> Video Prompts
-                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.videoPrompts.length})</span>
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({filtered.videoPrompts.length})</span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-3">
-                {parsed.videoPrompts.map((prompt, i) => (
+                {filtered.videoPrompts.map((prompt, i) => (
                   <PromptCard key={i} prompt={prompt} index={i} type="video" />
                 ))}
               </div>
@@ -279,8 +324,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         )}
       </Accordion>
 
+      {/* No results message */}
+      {searchQuery && totalResults === 0 && (
+        <div className="text-center py-12">
+          <Search className="mx-auto h-8 w-8 text-muted-foreground/40 mb-3" />
+          <p className="font-ui text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
+          <button onClick={() => setSearchQuery('')} className="mt-2 font-ui text-xs text-primary hover:underline">Clear search</button>
+        </div>
+      )}
+
       {/* Fallback raw output if parsing found nothing */}
-      {!parsed.titles.length && !parsed.story && !parsed.imagePrompts.length && (
+      {!searchQuery && !parsed.titles.length && !parsed.story && !parsed.imagePrompts.length && (
         <div className="ghibli-card mt-6 rounded-lg border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-lg font-semibold">Raw Output</h3>
