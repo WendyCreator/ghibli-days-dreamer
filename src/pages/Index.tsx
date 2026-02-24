@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import Header, { getWebhookUrl } from '@/components/Header';
+import Header from '@/components/Header';
 import InputForm from '@/components/InputForm';
 import LoadingView from '@/components/LoadingView';
 import ResultsView from '@/components/ResultsView';
 import { AppState, FormData, ParsedOutput } from '@/types';
 import { parseOutput } from '@/lib/parseOutput';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('form');
@@ -13,12 +14,6 @@ const Index: React.FC = () => {
   const [timestamp, setTimestamp] = useState<Date>(new Date());
 
   const handleSubmit = useCallback(async (data: FormData) => {
-    const webhookUrl = getWebhookUrl();
-    if (!webhookUrl) {
-      toast({ title: 'Webhook not configured', description: 'Please set your n8n webhook URL in settings.', variant: 'destructive' });
-      return;
-    }
-
     setAppState('loading');
 
     try {
@@ -31,22 +26,19 @@ const Index: React.FC = () => {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 min timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
+      const { data: responseData, error } = await supabase.functions.invoke('webhook-proxy', {
         body: formData,
-        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
+      if (error) {
+        throw new Error(error.message || 'Proxy request failed');
       }
 
-      const json = await response.json();
-      const outputText = json.output || JSON.stringify(json, null, 2);
+      const outputText = responseData?.output || JSON.stringify(responseData, null, 2);
       const result = parseOutput(outputText);
 
       setParsed(result);
@@ -62,7 +54,7 @@ const Index: React.FC = () => {
       } else {
         toast({
           title: 'Generation failed',
-          description: err.message || 'Something went wrong. Please check your webhook URL and try again.',
+          description: err.message || 'Something went wrong. Please try again.',
           variant: 'destructive',
         });
       }
