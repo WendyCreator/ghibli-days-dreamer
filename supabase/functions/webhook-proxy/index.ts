@@ -14,9 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    // Forward the request body as-is to the n8n webhook
     const body = await req.arrayBuffer();
     const contentType = req.headers.get("content-type") || "";
+
+    console.log("Proxying to n8n, content-type:", contentType, "body size:", body.byteLength);
 
     const response = await fetch(TARGET_WEBHOOK, {
       method: "POST",
@@ -26,17 +27,28 @@ serve(async (req) => {
 
     const data = await response.text();
 
+    if (!response.ok) {
+      console.error(`n8n returned ${response.status}: ${data}`);
+      return new Response(JSON.stringify({ 
+        error: `n8n webhook error (${response.status})`, 
+        details: data 
+      }), {
+        status: 200, // Return 200 so supabase client doesn't throw
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(data, {
-      status: response.status,
+      status: 200,
       headers: {
         ...corsHeaders,
-        "Content-Type": response.headers.get("Content-Type") || "application/json",
+        "Content-Type": response.headers.get("content-type") || "application/json",
       },
     });
   } catch (error) {
     console.error("Proxy error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
