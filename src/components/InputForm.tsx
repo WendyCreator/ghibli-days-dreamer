@@ -3,7 +3,6 @@ import { Upload, Image as ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormData } from '@/types';
-import { getWebhookUrl } from './Header';
 import { toast } from '@/hooks/use-toast';
 
 interface InputFormProps {
@@ -44,10 +43,6 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
     }
     if (!screenshot) {
       toast({ title: 'Missing screenshot', description: 'Please upload a channel screenshot.', variant: 'destructive' });
-      return;
-    }
-    if (!getWebhookUrl()) {
-      toast({ title: 'Webhook not configured', description: 'Please set your n8n webhook URL in settings (gear icon).', variant: 'destructive' });
       return;
     }
     onSubmit({ primaryTask: primaryTask.trim(), numberOfTitles, numberOfImages, screenshot });
