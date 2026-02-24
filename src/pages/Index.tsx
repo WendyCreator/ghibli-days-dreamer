@@ -38,7 +38,9 @@ const Index: React.FC = () => {
         throw new Error(error.message || 'Proxy request failed');
       }
 
-      const outputText = responseData?.output || JSON.stringify(responseData, null, 2);
+      // n8n may return an array of objects or a single object
+      const payload = Array.isArray(responseData) ? responseData[0] : responseData;
+      const outputText = payload?.output || JSON.stringify(payload, null, 2);
       const result = parseOutput(outputText);
 
       setParsed(result);
