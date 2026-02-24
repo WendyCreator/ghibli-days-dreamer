@@ -5,9 +5,10 @@ interface CopyButtonProps {
   text: string;
   label?: string;
   size?: 'sm' | 'md';
+  icon?: React.ReactNode;
 }
 
-const CopyButton: React.FC<CopyButtonProps> = ({ text, label, size = 'sm' }) => {
+const CopyButton: React.FC<CopyButtonProps> = ({ text, label, size = 'sm', icon }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -23,7 +24,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ text, label, size = 'sm' }) => 
         size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs'
       } font-ui text-muted-foreground hover:text-foreground shrink-0`}
     >
-      {copied ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
+      {copied ? <Check className="h-3 w-3 text-primary" /> : (icon || <Copy className="h-3 w-3" />)}
       {label || (copied ? 'Copied!' : 'Copy')}
     </button>
   );

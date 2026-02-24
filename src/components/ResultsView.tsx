@@ -172,7 +172,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           <SectionCard id="image-prompts" icon={Palette} title="Image Prompts" count={filtered.imagePrompts.length}>
             <div className="space-y-3">
               {filtered.imagePrompts.map((prompt, i) => (
-                <PromptCard key={i} prompt={prompt} index={i} type="image" />
+                <PromptCard key={i} prompt={prompt} index={i} type="image" pairedPrompt={parsed.videoPrompts[i]} />
               ))}
             </div>
           </SectionCard>
@@ -183,7 +183,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           <SectionCard id="video-prompts" icon={Film} title="Video Prompts" count={filtered.videoPrompts.length}>
             <div className="space-y-3">
               {filtered.videoPrompts.map((prompt, i) => (
-                <PromptCard key={i} prompt={prompt} index={i} type="video" />
+                <PromptCard key={i} prompt={prompt} index={i} type="video" pairedPrompt={parsed.imagePrompts[i]} />
               ))}
             </div>
           </SectionCard>
