@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        body: ['"Lora"', 'Georgia', 'serif'],
-        ui: ['"DM Sans"', 'sans-serif'],
+        display: ['"DM Sans"', 'Inter', 'sans-serif'],
+        body: ['"DM Sans"', 'Inter', 'sans-serif'],
+        ui: ['"DM Sans"', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
