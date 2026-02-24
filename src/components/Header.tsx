@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Settings, Leaf } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Settings, Leaf, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,6 +29,12 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onReset }) => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(getWebhookUrl());
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   const handleSave = useCallback(() => {
     setWebhookUrl(url.trim());
@@ -51,6 +57,11 @@ const Header: React.FC<HeaderProps> = ({ onReset }) => {
             </p>
           </div>
         </button>
+
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={() => setDark(d => !d)}>
+            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -81,6 +92,7 @@ const Header: React.FC<HeaderProps> = ({ onReset }) => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
       <div className="brushstroke-divider mx-auto mt-4 max-w-4xl" />
     </header>
