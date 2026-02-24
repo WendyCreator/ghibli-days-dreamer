@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Copy, Download, RotateCcw, Check, Dna, Sparkles, BookOpen, Users, Palette, Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -23,11 +23,73 @@ function CopyBtn({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-ui text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-ui text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground shrink-0"
     >
       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
       {copied ? 'Copied' : 'Copy'}
     </button>
+  );
+}
+
+/** Render story text with proper paragraph breaks */
+function StoryContent({ text }: { text: string }) {
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="font-body text-[0.95rem] leading-[1.85] text-foreground first-letter:text-lg first-letter:font-semibold">
+          {p.trim()}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/** Render a single image or video prompt card */
+function PromptCard({ prompt, index, type }: { prompt: string; index: number; type: 'image' | 'video' }) {
+  // Split prompt into first sentence (scene summary) and rest (details)
+  const firstBreak = prompt.indexOf('\n');
+  const title = firstBreak > 0 ? prompt.slice(0, firstBreak).trim() : '';
+  const body = firstBreak > 0 ? prompt.slice(firstBreak).trim() : prompt.trim();
+
+  return (
+    <div className="rounded-lg border border-border/50 bg-background/50 p-4 space-y-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 font-ui text-xs font-bold text-primary shrink-0">
+            {index + 1}
+          </span>
+          {title && (
+            <span className="font-ui text-sm font-semibold text-foreground">{title.replace(/^(Image|Video)\s*\d+\s*[:.]?\s*/i, '')}</span>
+          )}
+          {type === 'video' && (
+            <span className="text-xs text-muted-foreground/60 font-ui">(🎬 pairs with Image #{index + 1})</span>
+          )}
+        </div>
+        <CopyBtn text={prompt} />
+      </div>
+      <p className="font-body text-sm leading-relaxed text-muted-foreground pl-8">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+/** Render a character card */
+function CharacterCard({ char }: { char: { label: string; description: string } }) {
+  // Try to split description into physical appearance and clothing
+  const lines = char.description.split(/[.,]/).map(s => s.trim()).filter(Boolean);
+
+  return (
+    <div className="rounded-lg border border-border/50 bg-background/50 p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="rounded-full bg-primary/10 px-3 py-1 font-ui text-xs font-bold text-primary tracking-wide uppercase">
+          {char.label}
+        </span>
+        <CopyBtn text={`${char.label}: ${char.description}`} />
+      </div>
+      <p className="font-body text-sm leading-[1.7] text-foreground">{char.description}</p>
+    </div>
   );
 }
 
@@ -104,121 +166,117 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       <Accordion type="multiple" defaultValue={['channel-dna', 'titles', 'story', 'characters', 'image-prompts', 'video-prompts']}>
 
         {/* Channel DNA */}
-        <AccordionItem value="channel-dna" id="channel-dna" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><Dna className="h-5 w-5 text-primary" /> Channel DNA Analysis</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex justify-end mb-2"><CopyBtn text={parsed.channelDNA} /></div>
-            <div className="whitespace-pre-wrap font-body text-sm leading-relaxed text-foreground">
-              {parsed.channelDNA}
-            </div>
-            {parsed.channelDNAJson && (
-              <pre className="code-block mt-4 text-xs">{parsed.channelDNAJson}</pre>
-            )}
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.channelDNA && (
+          <AccordionItem value="channel-dna" id="channel-dna" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2"><Dna className="h-5 w-5 text-primary" /> Channel DNA Analysis</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex justify-end mb-2"><CopyBtn text={parsed.channelDNA} /></div>
+              <div className="whitespace-pre-wrap font-body text-sm leading-relaxed text-foreground">
+                {parsed.channelDNA}
+              </div>
+              {parsed.channelDNAJson && (
+                <pre className="code-block mt-4 text-xs">{parsed.channelDNAJson}</pre>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Titles */}
-        <AccordionItem value="titles" id="titles" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-secondary" /> Titles</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <ol className="space-y-3">
-              {parsed.titles.map((title, i) => (
-                <li key={i} className="flex items-start justify-between gap-3 rounded-md border border-border/50 bg-background/50 p-3">
-                  <span className="font-body text-sm">
-                    <span className="font-ui text-xs font-semibold text-muted-foreground mr-2">{i + 1}.</span>
-                    {title}
-                  </span>
-                  <CopyBtn text={title} />
-                </li>
-              ))}
-            </ol>
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.titles.length > 0 && (
+          <AccordionItem value="titles" id="titles" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-secondary-foreground" /> Titles
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.titles.length})</span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {parsed.titles.map((title, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2 rounded-md border border-border/50 bg-background/50 px-3 py-2.5">
+                    <span className="font-body text-sm leading-snug">
+                      <span className="font-ui text-xs font-bold text-muted-foreground mr-2">{i + 1}.</span>
+                      {title}
+                    </span>
+                    <CopyBtn text={title} />
+                  </div>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Story */}
-        <AccordionItem value="story" id="story" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary" /> Story</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex justify-end mb-2"><CopyBtn text={parsed.story} /></div>
-            <div className="whitespace-pre-wrap font-body text-base leading-[1.8] text-foreground">
-              {parsed.story}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.story && (
+          <AccordionItem value="story" id="story" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-primary" /> Story</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex justify-end mb-3"><CopyBtn text={parsed.story} /></div>
+              <StoryContent text={parsed.story} />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Characters */}
-        <AccordionItem value="characters" id="characters" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><Users className="h-5 w-5 text-secondary" /> Characters</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {parsed.characters.map((char, i) => (
-                <div key={i} className="rounded-lg border border-border/50 bg-background/50 p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="rounded-full bg-primary/10 px-3 py-0.5 font-ui text-xs font-semibold text-primary">
-                      {char.label}
-                    </span>
-                    <CopyBtn text={`${char.label}: ${char.description}`} />
-                  </div>
-                  <p className="font-body text-sm leading-relaxed text-foreground">{char.description}</p>
-                </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.characters.length > 0 && (
+          <AccordionItem value="characters" id="characters" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" /> Characters
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.characters.length})</span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {parsed.characters.map((char, i) => (
+                  <CharacterCard key={i} char={char} />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Image Prompts */}
-        <AccordionItem value="image-prompts" id="image-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><Palette className="h-5 w-5 text-primary" /> Image Prompts</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3">
-              {parsed.imagePrompts.map((prompt, i) => (
-                <div key={i} className="rounded-lg border border-border/50 bg-background/50 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="font-body text-sm leading-relaxed">
-                      <span className="font-ui text-xs font-bold text-muted-foreground mr-2">#{i + 1}</span>
-                      {prompt}
-                    </span>
-                    <CopyBtn text={prompt} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.imagePrompts.length > 0 && (
+          <AccordionItem value="image-prompts" id="image-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" /> Image Prompts
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.imagePrompts.length})</span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3">
+                {parsed.imagePrompts.map((prompt, i) => (
+                  <PromptCard key={i} prompt={prompt} index={i} type="image" />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Video Prompts */}
-        <AccordionItem value="video-prompts" id="video-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
-          <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
-            <span className="flex items-center gap-2"><Film className="h-5 w-5 text-secondary" /> Video Prompts</span>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3">
-              {parsed.videoPrompts.map((prompt, i) => (
-                <div key={i} className="rounded-lg border border-border/50 bg-background/50 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="font-body text-sm leading-relaxed">
-                      <span className="font-ui text-xs font-bold text-muted-foreground mr-2">
-                        🎬 #{i + 1} <span className="text-muted-foreground/60">(Image #{i + 1})</span>
-                      </span>
-                      {prompt}
-                    </span>
-                    <CopyBtn text={prompt} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        {parsed.videoPrompts.length > 0 && (
+          <AccordionItem value="video-prompts" id="video-prompts" className="ghibli-card mb-4 rounded-lg border border-border bg-card px-6">
+            <AccordionTrigger className="font-display text-lg font-semibold hover:no-underline">
+              <span className="flex items-center gap-2">
+                <Film className="h-5 w-5 text-primary" /> Video Prompts
+                <span className="ml-1 text-xs font-normal text-muted-foreground">({parsed.videoPrompts.length})</span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3">
+                {parsed.videoPrompts.map((prompt, i) => (
+                  <PromptCard key={i} prompt={prompt} index={i} type="video" />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
       </Accordion>
 
       {/* Fallback raw output if parsing found nothing */}
