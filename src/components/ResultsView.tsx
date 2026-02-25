@@ -69,7 +69,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
   };
 
   return (
-    <div className="animate-fade-in-up mx-auto max-w-4xl px-4 sm:px-6 pb-20">
+    <div className="animate-fade-in-up mx-auto max-w-4xl px-3 sm:px-6 pb-20">
       {/* Header */}
       <div className="mb-8 text-center pt-2">
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
@@ -81,7 +81,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       </div>
 
       {/* Action bar */}
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+      <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-center gap-2">
         <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleCopyAll}>
           <Copy className="h-3.5 w-3.5" /> Copy All
         </Button>
@@ -115,12 +115,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       )}
 
       {/* Jump-to navigation */}
-      <div className="mb-8 flex flex-wrap items-center justify-center gap-1.5">
+      <div className="mb-6 sm:mb-8 flex flex-wrap items-center justify-center gap-1.5">
         {sectionNav.map(s => (
           <button
             key={s.id}
             onClick={() => scrollTo(s.id)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/80 px-3 py-1.5 font-ui text-[11px] font-medium text-muted-foreground transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-sm"
+            className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border/50 bg-card/80 px-2.5 sm:px-3 py-1.5 font-ui text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-sm active:scale-95"
           >
             <s.icon className="h-3 w-3" />
             {s.label}
@@ -159,7 +159,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
         {/* Characters */}
         {filtered.characters.length > 0 && (
           <SectionCard id="characters" icon={Users} title="Characters" count={filtered.characters.length}>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.characters.map((char, i) => (
                 <CharacterCard key={i} char={char} />
               ))}

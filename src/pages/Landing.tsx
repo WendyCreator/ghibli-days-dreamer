@@ -17,11 +17,11 @@ const Landing: React.FC = () => {
       <div className="watercolor-blob-2" />
 
       {/* Nav */}
-      <nav className="relative z-10 px-6 py-6 md:px-12">
+      <nav className="relative z-10 px-4 py-4 sm:px-6 sm:py-6 md:px-12">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Leaf className="h-7 w-7 text-primary" />
-            <span className="font-display text-xl font-bold tracking-tight text-foreground">Ghibli Days</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Leaf className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
+            <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-foreground">Ghibli Days</span>
           </div>
           <Link to="/generate">
             <Button size="sm" className="generate-btn bg-primary font-ui">
@@ -32,20 +32,20 @@ const Landing: React.FC = () => {
       </nav>
 
       {/* Hero */}
-      <section className="relative z-10 px-6 pt-16 pb-20 md:pt-28 md:pb-32">
+      <section className="relative z-10 px-4 sm:px-6 pt-12 pb-16 sm:pt-16 sm:pb-20 md:pt-28 md:pb-32">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="font-ui text-xs font-medium text-muted-foreground">AI-Powered ASMR Content</span>
           </div>
-          <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground md:text-6xl md:leading-[1.1]">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-bold leading-tight tracking-tight text-foreground md:leading-[1.1]">
             Create Beautiful
             <br />
             <span className="text-primary">ASMR Content</span>
             <br />
             in Minutes
           </h1>
-          <p className="mx-auto mt-6 max-w-xl font-body text-base leading-relaxed text-muted-foreground md:text-lg">
+          <p className="mx-auto mt-4 sm:mt-6 max-w-xl font-body text-sm sm:text-base leading-relaxed text-muted-foreground md:text-lg">
             Generate titles, stories, characters, image prompts, and video direction — all styled with a hand-painted Ghibli aesthetic and powered by AI.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -93,8 +93,8 @@ const Landing: React.FC = () => {
       </section>
 
       {/* CTA */}
-      <section className="relative z-10 px-6 pb-24">
-        <div className="ghibli-card mx-auto max-w-2xl rounded-2xl border border-border/50 px-8 py-12 text-center md:px-16">
+      <section className="relative z-10 px-4 sm:px-6 pb-16 sm:pb-24">
+        <div className="ghibli-card mx-auto max-w-2xl rounded-2xl border border-border/50 px-5 py-8 sm:px-8 sm:py-12 text-center md:px-16">
           <Leaf className="mx-auto mb-4 h-8 w-8 text-primary" />
           <h2 className="font-display text-2xl font-bold text-foreground md:text-3xl">Ready to Create?</h2>
           <p className="mt-3 font-body text-sm text-muted-foreground">

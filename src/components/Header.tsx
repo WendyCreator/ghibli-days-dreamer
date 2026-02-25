@@ -42,17 +42,17 @@ const Header: React.FC<HeaderProps> = ({ onReset }) => {
   }, [url]);
 
   return (
-    <header className="relative z-10 px-6 py-6 md:px-12">
+    <header className="relative z-10 px-4 py-4 sm:px-6 sm:py-6 md:px-12">
       <div className="mx-auto flex max-w-4xl items-center justify-between">
-        <button onClick={onReset} className="group flex items-center gap-3 text-left">
-          <div className="relative">
-            <Leaf className="h-8 w-8 text-primary transition-transform group-hover:rotate-12" />
+        <button onClick={onReset} className="group flex items-center gap-2 sm:gap-3 text-left min-w-0">
+          <div className="relative shrink-0">
+            <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-primary transition-transform group-hover:rotate-12" />
           </div>
-          <div>
-            <h1 className="font-display text-2xl font-bold leading-tight tracking-tight text-foreground md:text-3xl">
+          <div className="min-w-0">
+            <h1 className="font-display text-lg sm:text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground truncate">
               Ghibli Days
             </h1>
-            <p className="font-ui text-xs tracking-widest text-muted-foreground uppercase">
+            <p className="font-ui text-[10px] sm:text-xs tracking-widest text-muted-foreground uppercase">
               ASMR Content Generator
             </p>
           </div>
@@ -94,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ onReset }) => {
         </Dialog>
         </div>
       </div>
-      <div className="brushstroke-divider mx-auto mt-4 max-w-4xl" />
+      <div className="brushstroke-divider mx-auto mt-3 sm:mt-4 max-w-4xl" />
     </header>
   );
 };

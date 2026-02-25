@@ -51,7 +51,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="animate-fade-in-up mx-auto max-w-2xl space-y-8 px-6 pb-12"
+      className="animate-fade-in-up mx-auto max-w-2xl space-y-6 sm:space-y-8 px-4 sm:px-6 pb-12"
     >
       {/* Primary Task */}
       <div className="space-y-2">
@@ -71,7 +71,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
       </div>
 
       {/* Number inputs */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div className="space-y-2">
           <label className="font-display text-lg font-semibold text-foreground">
             How many titles?
@@ -155,7 +155,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
       {/* Submit */}
       <Button
         type="submit"
-        className="generate-btn w-full bg-primary py-6 font-display text-lg font-semibold text-primary-foreground"
+        className="generate-btn w-full bg-primary py-5 sm:py-6 font-display text-base sm:text-lg font-semibold text-primary-foreground"
       >
         Generate Content ✦
       </Button>
