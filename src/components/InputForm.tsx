@@ -41,11 +41,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
       toast({ title: 'Missing task', description: 'Please describe what the video is about.', variant: 'destructive' });
       return;
     }
-    if (!screenshot) {
-      toast({ title: 'Missing screenshot', description: 'Please upload a channel screenshot.', variant: 'destructive' });
-      return;
-    }
-    onSubmit({ primaryTask: primaryTask.trim(), numberOfTitles, numberOfImages, screenshot });
+    onSubmit({ primaryTask: primaryTask.trim(), numberOfTitles, numberOfImages, screenshot: screenshot ?? undefined });
   }, [primaryTask, numberOfTitles, numberOfImages, screenshot, onSubmit]);
 
   return (
@@ -106,7 +102,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
       {/* Screenshot upload */}
       <div className="space-y-2">
         <label className="font-display text-lg font-semibold text-foreground">
-          Upload a YouTube channel screenshot
+          Upload a YouTube channel screenshot <span className="text-sm font-normal text-muted-foreground">(optional)</span>
         </label>
         <div
           className={`wooden-frame relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-lg p-6 transition-all ${

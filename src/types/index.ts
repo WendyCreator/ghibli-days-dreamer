@@ -2,7 +2,7 @@ export interface FormData {
   primaryTask: string;
   numberOfTitles: number;
   numberOfImages: number;
-  screenshot: File | null;
+  screenshot?: File | null;
 }
 
 export interface ParsedOutput {
