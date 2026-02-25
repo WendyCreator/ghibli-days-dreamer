@@ -23,6 +23,8 @@ const Index: React.FC = () => {
       formData.append('Number of Images', String(data.numberOfImages));
       if (data.screenshot) {
         formData.append('Screenshot', data.screenshot);
+      } else {
+        formData.append('Channel DNA Override', 'Use a default cozy Ghibli-inspired ASMR aesthetic: soft earthy color palette, hand-drawn warmth, gentle nature motifs, lo-fi ambient mood, whimsical storytelling with peaceful pastoral imagery.');
       }
 
       const controller = new AbortController();
