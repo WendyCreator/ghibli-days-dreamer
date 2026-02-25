@@ -25,7 +25,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, index, type, pairedProm
   return (
     <div className="rounded-xl border border-border/40 bg-background/60 overflow-hidden transition-colors hover:bg-accent/20">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
+      <div className="flex items-start justify-between gap-2 sm:gap-3 px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
         <div className="flex items-start gap-3 min-w-0">
           <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0 mt-0.5">
             <span className="font-ui text-xs font-bold text-primary">{index + 1}</span>
@@ -51,8 +51,8 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, index, type, pairedProm
       </div>
 
       {/* Body */}
-      <div className="px-4 pb-4 pt-1">
-        <p className="font-body text-[13px] leading-[1.75] text-muted-foreground pl-10">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-1">
+        <p className="font-body text-[13px] leading-[1.75] text-muted-foreground pl-0 sm:pl-10 break-words">
           {body}
         </p>
       </div>
