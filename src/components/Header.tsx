@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import HistoryPanel from './HistoryPanel';
+import { FormData, ParsedOutput } from '@/types';
 
 const WEBHOOK_KEY = 'ghibli-days-webhook-url';
 
@@ -24,9 +26,11 @@ export function setWebhookUrl(url: string) {
 
 interface HeaderProps {
   onReset?: () => void;
+  onRerun?: (formData: Omit<FormData, 'screenshot'>) => void;
+  onViewResult?: (parsed: ParsedOutput, timestamp: Date) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onReset }) => {
+const Header: React.FC<HeaderProps> = ({ onReset, onRerun, onViewResult }) => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(getWebhookUrl());
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
@@ -59,6 +63,10 @@ const Header: React.FC<HeaderProps> = ({ onReset }) => {
         </button>
 
         <div className="flex items-center gap-1">
+          {onRerun && onViewResult && (
+            <HistoryPanel onRerun={onRerun} onViewResult={onViewResult} />
+          )}
+
           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={() => setDark(d => !d)}>
             {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
