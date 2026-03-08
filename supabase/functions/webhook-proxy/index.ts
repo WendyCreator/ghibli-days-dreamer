@@ -26,6 +26,7 @@ serve(async (req) => {
     });
 
     const data = await response.text();
+    console.log("n8n response status:", response.status, "body length:", data.length);
 
     if (!response.ok) {
       console.error(`n8n returned ${response.status}: ${data}`);
@@ -33,17 +34,36 @@ serve(async (req) => {
         error: `n8n webhook error (${response.status})`, 
         details: data 
       }), {
-        status: 200, // Return 200 so supabase client doesn't throw
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!data || data.trim().length === 0) {
+      console.error("n8n returned empty response");
+      return new Response(JSON.stringify({ 
+        error: "n8n returned an empty response. The workflow may have timed out or failed silently." 
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Ensure the response is valid JSON for the Supabase client
+    try {
+      JSON.parse(data);
+    } catch {
+      // Wrap non-JSON text responses as JSON
+      console.log("Wrapping non-JSON response as JSON object");
+      return new Response(JSON.stringify({ output: data }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     return new Response(data, {
       status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": response.headers.get("content-type") || "application/json",
-      },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Proxy error:", error);
