@@ -113,20 +113,38 @@ export function parseOutput(raw: string): ParsedOutput {
         break;
       }
       case 'characters': {
-        // Try to parse character blocks
-        const charBlocks = content.split(/\n(?=(?:Father|Mother|Boy|Girl|One\s*Boy|Child|Kid|Son|Daughter|Grandfather|Grandmother|Elder|Baby|Toddler|Man|Woman|Old\s*Man|Old\s*Woman))/i);
+        // Strategy 1: Split by numbered entries like "1." "2)" or "Character 1:"
+        const numberedChars = content.split(/\n(?=\d+[\.\)]\s*)/);
+        // Strategy 2: Split by known character labels
+        const CHAR_LABELS = /(?:Father|Mother|Dad|Mom|Papa|Mama|Boy|Girl|Child|Kid|Son|Daughter|Grandfather|Grandmother|Grandpa|Grandma|Elder|Baby|Toddler|Man|Woman|Old\s*Man|Old\s*Woman|One\s*Boy|One\s*Girl|Little\s*Boy|Little\s*Girl|Young\s*Boy|Young\s*Girl|Brother|Sister|Uncle|Aunt|Narrator|Pet|Cat|Dog|Friend|Stranger|Villager|Character\s*\d*)/i;
+        const labelSplit = content.split(new RegExp(`\\n(?=${CHAR_LABELS.source}[:\\s-])`, 'i'));
+
+        // Pick the strategy that yields more blocks
+        const charBlocks = labelSplit.length >= numberedChars.length && labelSplit.length > 1
+          ? labelSplit
+          : numberedChars.length > 1
+            ? numberedChars
+            : content.split(/\n\n+/).filter(b => b.trim().length > 0);
+
         for (const block of charBlocks) {
-          const firstLine = block.split('\n')[0].trim();
-          if (firstLine) {
-            const labelMatch = firstLine.match(/^(Father|Mother|Boy|Girl|One\s*Boy|Child|Kid|Son|Daughter|Grandfather|Grandmother|Elder|Baby|Toddler|Man|Woman|Old\s*Man|Old\s*Woman)[:\s-]*/i);
-            if (labelMatch) {
-              result.characters.push({
-                label: labelMatch[1],
-                description: block.replace(firstLine, '').trim() || firstLine.replace(labelMatch[0], '').trim(),
-              });
-            } else {
-              result.characters.push({ label: 'Character', description: block.trim() });
-            }
+          const trimmed = block.trim();
+          if (!trimmed) continue;
+          // Remove leading number like "1. " or "2) "
+          const cleaned = trimmed.replace(/^\d+[\.\)]\s*/, '');
+          // Try to extract label from "Label: description" or "Label - description" or "**Label**"
+          const labelMatch = cleaned.match(/^\*{0,2}([^:*\n-]+?)\*{0,2}\s*[:\-–—]\s*([\s\S]*)/);
+          if (labelMatch) {
+            result.characters.push({
+              label: labelMatch[1].trim(),
+              description: labelMatch[2].trim() || cleaned,
+            });
+          } else {
+            // Use first line as label, rest as description
+            const lines = cleaned.split('\n');
+            result.characters.push({
+              label: lines[0].replace(/^\*{1,2}|\*{1,2}$/g, '').trim() || 'Character',
+              description: lines.slice(1).join('\n').trim() || lines[0].trim(),
+            });
           }
         }
         if (result.characters.length === 0) {
