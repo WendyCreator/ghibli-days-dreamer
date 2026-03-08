@@ -40,8 +40,16 @@ const Index: React.FC = () => {
         throw new Error(error.message || 'Proxy request failed');
       }
 
+      if (!responseData) {
+        throw new Error('Empty response from the generation pipeline. Please try again.');
+      }
+
       // n8n may return an array of objects or a single object
       const payload = Array.isArray(responseData) ? responseData[0] : responseData;
+
+      if (payload?.error) {
+        throw new Error(payload.error);
+      }
       const outputText = payload?.output || JSON.stringify(payload, null, 2);
       const result = parseOutput(outputText);
 
