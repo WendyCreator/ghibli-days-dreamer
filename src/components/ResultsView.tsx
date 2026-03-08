@@ -29,6 +29,31 @@ const sectionNav = [
 
 const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPdf = useCallback(async () => {
+    if (!contentRef.current) return;
+    setExporting(true);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      await html2pdf()
+        .set({
+          margin: [10, 10, 10, 10],
+          filename: `ghibli-days-${timestamp.toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        })
+        .from(contentRef.current)
+        .save();
+    } catch {
+      toast({ title: 'Export failed', description: 'Could not generate PDF.', variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  }, [timestamp]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
