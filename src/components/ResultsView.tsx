@@ -11,6 +11,7 @@ import TitlesList from './results/TitlesList';
 import StorySection from './results/StorySection';
 import CharacterCard from './results/CharacterCard';
 import PromptCard from './results/PromptCard';
+import PdfRenderer from './results/PdfRenderer';
 
 interface ResultsViewProps {
   parsed: ParsedOutput;
@@ -19,7 +20,7 @@ interface ResultsViewProps {
 }
 
 const sectionNav = [
-  { id: 'channel-dna', label: 'Channel DNA', icon: Dna },
+  { id: 'channel-dna', label: 'DNA', icon: Dna },
   { id: 'titles', label: 'Titles', icon: Sparkles },
   { id: 'story', label: 'Story', icon: BookOpen },
   { id: 'characters', label: 'Characters', icon: Users },
@@ -29,25 +30,26 @@ const sectionNav = [
 
 const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const contentRef = useRef<HTMLDivElement>(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
   const handleExportPdf = useCallback(async () => {
-    if (!contentRef.current) return;
+    if (!pdfRef.current) return;
     setExporting(true);
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       await html2pdf()
         .set({
-          margin: [10, 10, 10, 10],
+          margin: [8, 8, 8, 8],
           filename: `ghibli-days-${timestamp.toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: false },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
         })
-        .from(contentRef.current)
+        .from(pdfRef.current)
         .save();
+      toast({ title: 'PDF exported', description: 'Your report has been downloaded.' });
     } catch {
       toast({ title: 'Export failed', description: 'Could not generate PDF.', variant: 'destructive' });
     } finally {
@@ -94,30 +96,43 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
   };
 
   return (
-    <div className="animate-fade-in-up mx-auto max-w-4xl px-3 sm:px-6 pb-20">
+    <div className="animate-fade-in-up mx-auto max-w-4xl px-4 sm:px-6 pb-20">
+      {/* Hidden PDF renderer */}
+      <PdfRenderer ref={pdfRef} parsed={parsed} timestamp={timestamp} />
+
       {/* Header */}
       <div className="mb-8 text-center pt-2">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-4 py-1.5 mb-4">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <span className="font-ui text-xs font-medium text-accent-foreground">Generation Complete</span>
+        </div>
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
           Your Content is Ready
         </h2>
         <p className="mt-2 font-ui text-sm text-muted-foreground">
-          Generated on {timestamp.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          {timestamp.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </div>
 
       {/* Action bar */}
-      <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-center gap-2">
-        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleCopyAll}>
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5 rounded-lg" onClick={handleCopyAll}>
           <Copy className="h-3.5 w-3.5" /> Copy All
         </Button>
-        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleDownload}>
+        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5 rounded-lg" onClick={handleDownload}>
           <Download className="h-3.5 w-3.5" /> Download TXT
         </Button>
-        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleExportPdf} disabled={exporting}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="font-ui text-xs h-9 gap-1.5 rounded-lg border-primary/30 text-primary hover:bg-accent"
+          onClick={handleExportPdf}
+          disabled={exporting}
+        >
           <FileText className="h-3.5 w-3.5" /> {exporting ? 'Exporting…' : 'Export PDF'}
         </Button>
-        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={onReset}>
-          <RotateCcw className="h-3.5 w-3.5" /> New Generation
+        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5 rounded-lg" onClick={onReset}>
+          <RotateCcw className="h-3.5 w-3.5" /> New
         </Button>
       </div>
 
@@ -128,7 +143,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           placeholder="Search content…"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="pl-9 pr-9 font-ui text-sm h-10 bg-card border-border/60"
+          className="pl-9 pr-9 font-ui text-sm h-10 bg-card border-border/60 rounded-lg"
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -143,12 +158,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       )}
 
       {/* Jump-to navigation */}
-      <div className="mb-6 sm:mb-8 flex flex-wrap items-center justify-center gap-1.5">
+      <div className="mb-8 flex flex-wrap items-center justify-center gap-1.5">
         {sectionNav.map(s => (
           <button
             key={s.id}
             onClick={() => scrollTo(s.id)}
-            className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border/50 bg-card/80 px-2.5 sm:px-3 py-1.5 font-ui text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-sm active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/50 bg-card px-3 py-1.5 font-ui text-[11px] font-medium text-muted-foreground transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-sm active:scale-95"
           >
             <s.icon className="h-3 w-3" />
             {s.label}
@@ -157,11 +172,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       </div>
 
       {/* Content sections */}
-      <div ref={contentRef} className="space-y-5">
-        {/* Channel DNA */}
+      <div className="space-y-5">
         {filtered.channelDNA && (
           <SectionCard id="channel-dna" icon={Dna} title="Channel DNA Analysis" actions={<CopyButton text={filtered.channelDNA} />}>
-            <div className="whitespace-pre-wrap font-body text-sm leading-[1.8] text-foreground/85">
+            <div className="whitespace-pre-wrap font-body text-[13px] leading-[1.85] text-foreground/80">
               {filtered.channelDNA}
             </div>
             {filtered.channelDNAJson && (
@@ -170,21 +184,18 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           </SectionCard>
         )}
 
-        {/* Titles */}
         {filtered.titles.length > 0 && (
           <SectionCard id="titles" icon={Sparkles} title="Titles" count={filtered.titles.length}>
             <TitlesList titles={filtered.titles} />
           </SectionCard>
         )}
 
-        {/* Story */}
         {filtered.story && (
           <SectionCard id="story" icon={BookOpen} title="Story" actions={<CopyButton text={filtered.story} />}>
             <StorySection text={filtered.story} />
           </SectionCard>
         )}
 
-        {/* Characters */}
         {filtered.characters.length > 0 && (
           <SectionCard id="characters" icon={Users} title="Characters" count={filtered.characters.length}>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -195,7 +206,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           </SectionCard>
         )}
 
-        {/* Image Prompts */}
         {filtered.imagePrompts.length > 0 && (
           <SectionCard id="image-prompts" icon={Palette} title="Image Prompts" count={filtered.imagePrompts.length}>
             <div className="space-y-3">
@@ -206,7 +216,6 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           </SectionCard>
         )}
 
-        {/* Video Prompts */}
         {filtered.videoPrompts.length > 0 && (
           <SectionCard id="video-prompts" icon={Film} title="Video Prompts" count={filtered.videoPrompts.length}>
             <div className="space-y-3">
@@ -221,7 +230,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       {/* No results */}
       {searchQuery && totalResults === 0 && (
         <div className="text-center py-16">
-          <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted/60 mb-4">
+          <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-muted mb-4">
             <Search className="h-5 w-5 text-muted-foreground" />
           </div>
           <p className="font-ui text-sm text-muted-foreground">No results for "{searchQuery}"</p>
@@ -235,7 +244,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           <p className="font-ui text-xs text-muted-foreground mb-3">
             Could not parse sections automatically. Showing raw output below.
           </p>
-          <pre className="whitespace-pre-wrap font-body text-sm leading-relaxed text-foreground/85">{parsed.raw}</pre>
+          <pre className="whitespace-pre-wrap font-body text-sm leading-relaxed text-foreground/80">{parsed.raw}</pre>
         </SectionCard>
       )}
     </div>

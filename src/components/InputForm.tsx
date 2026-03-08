@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormData } from '@/types';
@@ -47,30 +47,30 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="animate-fade-in-up mx-auto max-w-2xl space-y-6 sm:space-y-8 px-4 sm:px-6 pb-12"
+      className="animate-fade-in-up mx-auto max-w-xl space-y-7 px-4 sm:px-6 pb-12"
     >
       {/* Primary Task */}
-      <div className="space-y-2">
-        <label className="font-display text-lg font-semibold text-foreground">
+      <div className="space-y-2.5">
+        <label className="font-display text-base font-semibold text-foreground">
           What is the video about?
         </label>
         <Input
           value={primaryTask}
           onChange={e => setPrimaryTask(e.target.value)}
-          placeholder="e.g., Forest Tea Ceremony, Campfire Cooking, Rainy Day Gardening"
-          className="ghibli-card border-border bg-card font-body text-base"
+          placeholder="e.g., Forest Tea Ceremony, Campfire Cooking…"
+          className="border-border bg-card font-body text-sm h-11 rounded-lg"
           required
         />
-        <p className="font-ui text-xs text-muted-foreground">
+        <p className="font-ui text-[11px] text-muted-foreground">
           One activity only — this anchors the entire video
         </p>
       </div>
 
       {/* Number inputs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        <div className="space-y-2">
-          <label className="font-display text-lg font-semibold text-foreground">
-            How many titles?
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2.5">
+          <label className="font-display text-sm font-semibold text-foreground">
+            Titles
           </label>
           <Input
             type="number"
@@ -78,12 +78,12 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
             onChange={e => setNumberOfTitles(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
             min={1}
             max={20}
-            className="ghibli-card border-border bg-card font-ui"
+            className="border-border bg-card font-ui text-sm h-11 rounded-lg"
           />
         </div>
-        <div className="space-y-2">
-          <label className="font-display text-lg font-semibold text-foreground">
-            How many image prompts?
+        <div className="space-y-2.5">
+          <label className="font-display text-sm font-semibold text-foreground">
+            Image prompts
           </label>
           <Input
             type="number"
@@ -91,22 +91,22 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
             onChange={e => setNumberOfImages(Math.min(30, Math.max(5, parseInt(e.target.value) || 5)))}
             min={5}
             max={30}
-            className="ghibli-card border-border bg-card font-ui"
+            className="border-border bg-card font-ui text-sm h-11 rounded-lg"
           />
-          <p className="font-ui text-xs text-muted-foreground">
-            Each image prompt will also generate a matching video prompt
+          <p className="font-ui text-[11px] text-muted-foreground">
+            + matching video prompts
           </p>
         </div>
       </div>
 
       {/* Screenshot upload */}
-      <div className="space-y-2">
-        <label className="font-display text-lg font-semibold text-foreground">
-          Upload a YouTube channel screenshot <span className="text-sm font-normal text-muted-foreground">(optional)</span>
+      <div className="space-y-2.5">
+        <label className="font-display text-sm font-semibold text-foreground">
+          Channel screenshot <span className="text-xs font-normal text-muted-foreground">(optional)</span>
         </label>
         <div
-          className={`wooden-frame relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-lg p-6 transition-all ${
-            dragActive ? 'border-primary bg-primary/5' : ''
+          className={`wooden-frame relative flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-xl p-6 transition-all ${
+            dragActive ? 'border-primary bg-accent/50' : ''
           }`}
           onDragOver={e => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
@@ -122,36 +122,36 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
           />
           {preview ? (
             <div className="relative">
-              <img src={preview} alt="Channel screenshot" className="max-h-40 rounded-md object-contain" />
+              <img src={preview} alt="Channel screenshot" className="max-h-36 rounded-lg object-contain" />
               <button
                 type="button"
                 onClick={e => { e.stopPropagation(); setScreenshot(null); setPreview(null); }}
-                className="absolute -top-2 -right-2 rounded-full bg-card p-1 shadow-md"
+                className="absolute -top-2 -right-2 rounded-full bg-card border border-border p-1 shadow-md hover:bg-muted transition-colors"
               >
-                <X className="h-4 w-4 text-muted-foreground" />
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             </div>
           ) : (
             <>
-              <Upload className="mb-3 h-10 w-10 text-muted-foreground/50" />
+              <Upload className="mb-2.5 h-8 w-8 text-muted-foreground/40" />
               <p className="font-ui text-sm text-muted-foreground">
-                Drag & drop or click to upload
+                Drop image or click to upload
               </p>
-              <p className="font-ui text-xs text-muted-foreground/70 mt-1">
+              <p className="font-ui text-[10px] text-muted-foreground/60 mt-0.5">
                 JPG or PNG
               </p>
             </>
           )}
         </div>
-        <p className="font-ui text-xs text-muted-foreground">
-          Upload a screenshot of any YouTube channel homepage for DNA analysis
+        <p className="font-ui text-[11px] text-muted-foreground">
+          Upload a YouTube channel homepage screenshot for DNA analysis
         </p>
       </div>
 
       {/* Submit */}
       <Button
         type="submit"
-        className="generate-btn w-full bg-primary py-5 sm:py-6 font-display text-base sm:text-lg font-semibold text-primary-foreground"
+        className="generate-btn w-full py-5 sm:py-6 font-display text-sm sm:text-base font-semibold text-primary-foreground rounded-xl"
       >
         Generate Content ✦
       </Button>
