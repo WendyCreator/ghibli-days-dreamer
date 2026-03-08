@@ -88,8 +88,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit }) => {
           <Input
             type="number"
             value={numberOfImages}
-            onChange={e => setNumberOfImages(Math.min(30, Math.max(10, parseInt(e.target.value) || 10)))}
-            min={10}
+            onChange={e => setNumberOfImages(Math.min(30, Math.max(5, parseInt(e.target.value) || 5)))}
+            min={5}
             max={30}
             className="ghibli-card border-border bg-card font-ui"
           />
