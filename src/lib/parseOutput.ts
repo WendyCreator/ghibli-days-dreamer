@@ -114,11 +114,11 @@ export function parseOutput(raw: string): ParsedOutput {
       }
       case 'characters': {
         // Try to parse character blocks
-        const charBlocks = content.split(/\n(?=(?:Father|Mother|One\s*Boy|Child|Kid|Son|Daughter))/i);
+        const charBlocks = content.split(/\n(?=(?:Father|Mother|Boy|Girl|One\s*Boy|Child|Kid|Son|Daughter|Grandfather|Grandmother|Elder|Baby|Toddler|Man|Woman|Old\s*Man|Old\s*Woman))/i);
         for (const block of charBlocks) {
           const firstLine = block.split('\n')[0].trim();
           if (firstLine) {
-            const labelMatch = firstLine.match(/^(Father|Mother|One\s*Boy|Child|Kid|Son|Daughter)[:\s-]*/i);
+            const labelMatch = firstLine.match(/^(Father|Mother|Boy|Girl|One\s*Boy|Child|Kid|Son|Daughter|Grandfather|Grandmother|Elder|Baby|Toddler|Man|Woman|Old\s*Man|Old\s*Woman)[:\s-]*/i);
             if (labelMatch) {
               result.characters.push({
                 label: labelMatch[1],
