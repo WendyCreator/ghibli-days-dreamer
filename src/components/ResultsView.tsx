@@ -157,7 +157,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       </div>
 
       {/* Content sections */}
-      <div className="space-y-5">
+      <div ref={contentRef} className="space-y-5">
         {/* Channel DNA */}
         {filtered.channelDNA && (
           <SectionCard id="channel-dna" icon={Dna} title="Channel DNA Analysis" actions={<CopyButton text={filtered.channelDNA} />}>
