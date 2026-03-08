@@ -111,7 +111,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           <Copy className="h-3.5 w-3.5" /> Copy All
         </Button>
         <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleDownload}>
-          <Download className="h-3.5 w-3.5" /> Download
+          <Download className="h-3.5 w-3.5" /> Download TXT
+        </Button>
+        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleExportPdf} disabled={exporting}>
+          <FileText className="h-3.5 w-3.5" /> {exporting ? 'Exporting…' : 'Export PDF'}
         </Button>
         <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={onReset}>
           <RotateCcw className="h-3.5 w-3.5" /> New Generation
