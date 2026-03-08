@@ -5,6 +5,7 @@ import LoadingView from '@/components/LoadingView';
 import ResultsView from '@/components/ResultsView';
 import { AppState, FormData, ParsedOutput } from '@/types';
 import { parseOutput } from '@/lib/parseOutput';
+import { addToHistory } from '@/lib/historyStore';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,7 +47,6 @@ const Index: React.FC = () => {
         throw new Error('Empty response from the generation pipeline. Please try again.');
       }
 
-      // n8n may return an array of objects or a single object
       const payload = Array.isArray(responseData) ? responseData[0] : responseData;
 
       if (payload?.error) {
@@ -56,8 +56,12 @@ const Index: React.FC = () => {
       const result = parseOutput(outputText);
 
       setParsed(result);
-      setTimestamp(new Date());
+      const now = new Date();
+      setTimestamp(now);
       setAppState('results');
+
+      // Save to history
+      addToHistory(data, result);
     } catch (err: any) {
       const retry = () => {
         if (lastFormData.current) {
@@ -84,6 +88,16 @@ const Index: React.FC = () => {
     }
   }, []);
 
+  const handleRerun = useCallback((formData: Omit<FormData, 'screenshot'>) => {
+    handleSubmit({ ...formData, screenshot: null });
+  }, [handleSubmit]);
+
+  const handleViewResult = useCallback((result: ParsedOutput, ts: Date) => {
+    setParsed(result);
+    setTimestamp(ts);
+    setAppState('results');
+  }, []);
+
   const handleReset = useCallback(() => {
     setAppState('form');
     setParsed(null);
@@ -91,11 +105,10 @@ const Index: React.FC = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Watercolor blobs */}
       <div className="watercolor-blob-1" />
       <div className="watercolor-blob-2" />
 
-      <Header onReset={handleReset} />
+      <Header onReset={handleReset} onRerun={handleRerun} onViewResult={handleViewResult} />
 
       <main className="relative z-10">
         {appState === 'form' && <InputForm onSubmit={handleSubmit} />}
