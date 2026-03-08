@@ -20,7 +20,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ text, label, size = 'sm', icon 
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-muted/40 transition-all hover:bg-accent hover:border-border ${
+      className={`inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 transition-all hover:bg-accent hover:border-primary/20 ${
         size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs'
       } font-ui text-muted-foreground hover:text-foreground shrink-0`}
     >

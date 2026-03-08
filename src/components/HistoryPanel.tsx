@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { History, Trash2, Play, X, Clock, ChevronRight } from 'lucide-react';
+import { History, Trash2, Play, Clock, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { HistoryEntry, getHistory, deleteFromHistory, clearHistory } from '@/lib/historyStore';
@@ -57,31 +57,26 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onRerun, onViewResult }) =>
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
-          <History className="h-5 w-5" />
-          {entries.length > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
-              {entries.length > 9 ? '9+' : entries.length}
-            </span>
-          )}
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground h-9 w-9 relative">
+          <History className="h-4 w-4" />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md bg-background border-border overflow-y-auto">
         <SheetHeader className="pb-4">
-          <SheetTitle className="font-display text-lg flex items-center gap-2">
-            <History className="h-5 w-5 text-primary" />
-            Generation History
+          <SheetTitle className="font-display text-base flex items-center gap-2">
+            <History className="h-4 w-4 text-primary" />
+            History
           </SheetTitle>
         </SheetHeader>
 
         {entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted/60 mb-4">
+            <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-muted mb-4">
               <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="font-ui text-sm text-muted-foreground">No generations yet</p>
-            <p className="font-ui text-xs text-muted-foreground/70 mt-1">
-              Your past generations will appear here
+            <p className="font-ui text-xs text-muted-foreground/60 mt-1">
+              Past generations appear here
             </p>
           </div>
         ) : (
@@ -96,7 +91,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onRerun, onViewResult }) =>
                 <button
                   key={entry.id}
                   onClick={() => handleView(entry)}
-                  className="w-full text-left rounded-lg border border-border/50 bg-card/80 p-3 transition-all hover:bg-accent/30 hover:border-border group"
+                  className="w-full text-left rounded-xl border border-border/50 bg-card p-3.5 transition-all hover:border-primary/20 hover:shadow-sm group"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
@@ -107,16 +102,16 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onRerun, onViewResult }) =>
                         <span className="font-ui text-[10px] text-muted-foreground">
                           {entry.formData.numberOfTitles} titles · {entry.formData.numberOfImages} images
                         </span>
-                        <span className="font-ui text-[10px] text-muted-foreground/60">
+                        <span className="font-ui text-[10px] text-muted-foreground/50">
                           {formatDate(entry.timestamp)}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-0.5 shrink-0">
                       <button
                         onClick={(e) => handleRerun(entry, e)}
-                        className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Re-run with same settings"
+                        className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                        title="Re-run"
                       >
                         <Play className="h-3.5 w-3.5" />
                       </button>
@@ -127,7 +122,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onRerun, onViewResult }) =>
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
                     </div>
                   </div>
                 </button>
