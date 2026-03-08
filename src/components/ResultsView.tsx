@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X } from 'lucide-react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ParsedOutput } from '@/types';
@@ -29,6 +29,31 @@ const sectionNav = [
 
 const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPdf = useCallback(async () => {
+    if (!contentRef.current) return;
+    setExporting(true);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      await html2pdf()
+        .set({
+          margin: [10, 10, 10, 10],
+          filename: `ghibli-days-${timestamp.toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        })
+        .from(contentRef.current)
+        .save();
+    } catch {
+      toast({ title: 'Export failed', description: 'Could not generate PDF.', variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  }, [timestamp]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -86,7 +111,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           <Copy className="h-3.5 w-3.5" /> Copy All
         </Button>
         <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleDownload}>
-          <Download className="h-3.5 w-3.5" /> Download
+          <Download className="h-3.5 w-3.5" /> Download TXT
+        </Button>
+        <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={handleExportPdf} disabled={exporting}>
+          <FileText className="h-3.5 w-3.5" /> {exporting ? 'Exporting…' : 'Export PDF'}
         </Button>
         <Button variant="outline" size="sm" className="font-ui text-xs h-9 gap-1.5" onClick={onReset}>
           <RotateCcw className="h-3.5 w-3.5" /> New Generation
@@ -129,7 +157,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       </div>
 
       {/* Content sections */}
-      <div className="space-y-5">
+      <div ref={contentRef} className="space-y-5">
         {/* Channel DNA */}
         {filtered.channelDNA && (
           <SectionCard id="channel-dna" icon={Dna} title="Channel DNA Analysis" actions={<CopyButton text={filtered.channelDNA} />}>
