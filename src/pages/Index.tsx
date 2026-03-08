@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Header from '@/components/Header';
 import InputForm from '@/components/InputForm';
 import LoadingView from '@/components/LoadingView';
@@ -12,8 +12,10 @@ const Index: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('form');
   const [parsed, setParsed] = useState<ParsedOutput | null>(null);
   const [timestamp, setTimestamp] = useState<Date>(new Date());
+  const lastFormData = useRef<FormData | null>(null);
 
   const handleSubmit = useCallback(async (data: FormData) => {
+    lastFormData.current = data;
     setAppState('loading');
 
     try {
@@ -57,17 +59,25 @@ const Index: React.FC = () => {
       setTimestamp(new Date());
       setAppState('results');
     } catch (err: any) {
+      const retry = () => {
+        if (lastFormData.current) {
+          handleSubmit(lastFormData.current);
+        }
+      };
+
       if (err.name === 'AbortError') {
         toast({
           title: 'Request timed out',
-          description: 'The generation took too long (>5 minutes). Please try again.',
+          description: 'The generation took too long (>5 minutes).',
           variant: 'destructive',
+          action: <button onClick={retry} className="shrink-0 rounded-md bg-destructive-foreground/20 px-3 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive-foreground/30 transition-colors">Retry</button>,
         });
       } else {
         toast({
           title: 'Generation failed',
-          description: err.message || 'Something went wrong. Please try again.',
+          description: err.message || 'Something went wrong.',
           variant: 'destructive',
+          action: <button onClick={retry} className="shrink-0 rounded-md bg-destructive-foreground/20 px-3 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive-foreground/30 transition-colors">Retry</button>,
         });
       }
       setAppState('form');
