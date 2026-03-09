@@ -37,20 +37,59 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
     if (!pdfRef.current) return;
     setExporting(true);
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      await html2pdf()
-        .set({
-          margin: [8, 8, 8, 8],
-          filename: `ghibli-days-${timestamp.toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, scrollY: 0, logging: false },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-        })
-        .from(pdfRef.current)
-        .save();
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+
+      // Make element visible for rendering
+      const el = pdfRef.current;
+      el.style.position = 'fixed';
+      el.style.left = '0';
+      el.style.top = '0';
+      el.style.zIndex = '9999';
+
+      // Wait a frame for layout
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: 794,
+        windowWidth: 794,
+      });
+
+      // Hide again
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      el.style.zIndex = '-1';
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = -(imgHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`ghibli-days-${timestamp.toISOString().slice(0, 10)}.pdf`);
       toast({ title: 'PDF exported', description: 'Your report has been downloaded.' });
-    } catch {
+    } catch (err) {
+      console.error('PDF export error:', err);
       toast({ title: 'Export failed', description: 'Could not generate PDF.', variant: 'destructive' });
     } finally {
       setExporting(false);
