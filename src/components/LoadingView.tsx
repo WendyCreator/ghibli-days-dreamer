@@ -12,6 +12,7 @@ const stages = [
 
 const LoadingView: React.FC = () => {
   const [activeStage, setActiveStage] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -19,6 +20,18 @@ const LoadingView: React.FC = () => {
     }, 20000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setElapsed(prev => prev + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
 
   const progress = ((activeStage + 1) / stages.length) * 100;
 
@@ -41,7 +54,7 @@ const LoadingView: React.FC = () => {
         Generating your content…
       </h2>
       <p className="font-ui text-sm text-muted-foreground mb-10 text-center">
-        This takes about 2–3 minutes
+        This takes about 2–3 minutes · <span className="font-medium text-foreground/70">{formatTime(elapsed)}</span> elapsed
       </p>
 
       {/* Progress bar */}
