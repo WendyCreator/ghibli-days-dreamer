@@ -12,6 +12,7 @@ const stages = [
 
 const LoadingView: React.FC = () => {
   const [activeStage, setActiveStage] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
