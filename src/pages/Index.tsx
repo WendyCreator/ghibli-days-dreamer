@@ -52,7 +52,16 @@ const Index: React.FC = () => {
         throw new Error(`Proxy request failed (${response.status}): ${errText}`);
       }
 
-      const responseData = await response.json();
+      // Read the streaming response (contains keepalive spaces + JSON at end)
+      const rawText = await response.text();
+      // Strip keepalive spaces to get the JSON payload
+      const jsonText = rawText.trim();
+      
+      if (!jsonText) {
+        throw new Error('Empty response from the generation pipeline. Please try again.');
+      }
+
+      const responseData = JSON.parse(jsonText);
 
       if (!responseData) {
         throw new Error('Empty response from the generation pipeline. Please try again.');
