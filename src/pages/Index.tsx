@@ -7,7 +7,6 @@ import { AppState, FormData, ParsedOutput } from '@/types';
 import { parseOutput } from '@/lib/parseOutput';
 import { addToHistory } from '@/lib/historyStore';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const Index: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('form');
@@ -33,15 +32,27 @@ const Index: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
 
-      const { data: responseData, error } = await supabase.functions.invoke('webhook-proxy', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/webhook-proxy`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
+        },
         body: formData,
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      if (error) {
-        throw new Error(error.message || 'Proxy request failed');
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Proxy request failed (${response.status}): ${errText}`);
       }
+
+      const responseData = await response.json();
 
       if (!responseData) {
         throw new Error('Empty response from the generation pipeline. Please try again.');
