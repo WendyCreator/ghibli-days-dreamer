@@ -7,7 +7,6 @@ import { AppState, FormData, ParsedOutput } from '@/types';
 import { parseOutput } from '@/lib/parseOutput';
 import { addToHistory } from '@/lib/historyStore';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const Index: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('form');
