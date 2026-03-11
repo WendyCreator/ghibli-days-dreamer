@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const TARGET_WEBHOOK = "https://n8n.zaicondigital.com/webhook/ghibliautomation";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,49 +19,77 @@ serve(async (req) => {
 
     console.log("Proxying to n8n, content-type:", contentType, "body size:", body.byteLength);
 
-    const response = await fetch(TARGET_WEBHOOK, {
+    // Use a ReadableStream to send keepalive pings while waiting for n8n
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const encoder = new TextEncoder();
+
+    // Start the n8n request
+    const n8nPromise = fetch(TARGET_WEBHOOK, {
       method: "POST",
       headers: { "Content-Type": contentType },
       body,
     });
 
-    const data = await response.text();
-    console.log("n8n response status:", response.status, "body length:", data.length);
+    // Send keepalive pings every 15 seconds to prevent connection timeout
+    let resolved = false;
+    const keepaliveInterval = setInterval(async () => {
+      if (!resolved) {
+        try {
+          await writer.write(encoder.encode(" "));
+        } catch {
+          // Writer closed, stop pinging
+          clearInterval(keepaliveInterval);
+        }
+      }
+    }, 15000);
 
-    if (!response.ok) {
-      console.error(`n8n returned ${response.status}: ${data}`);
-      return new Response(JSON.stringify({ 
-        error: `n8n webhook error (${response.status})`, 
-        details: data 
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (!data || data.trim().length === 0) {
-      console.error("n8n returned empty response");
-      return new Response(JSON.stringify({ 
-        error: "n8n returned an empty response. The workflow may have timed out or failed silently." 
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Ensure the response is valid JSON for the Supabase client
+    // Wait for n8n response
     try {
-      JSON.parse(data);
-    } catch {
-      // Wrap non-JSON text responses as JSON
-      console.log("Wrapping non-JSON response as JSON object");
-      return new Response(JSON.stringify({ output: data }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const response = await n8nPromise;
+      resolved = true;
+      clearInterval(keepaliveInterval);
+
+      const data = await response.text();
+      console.log("n8n response status:", response.status, "body length:", data.length);
+
+      let result: string;
+
+      if (!response.ok) {
+        console.error(`n8n returned ${response.status}: ${data}`);
+        result = JSON.stringify({
+          error: `n8n webhook error (${response.status})`,
+          details: data,
+        });
+      } else if (!data || data.trim().length === 0) {
+        console.error("n8n returned empty response");
+        result = JSON.stringify({
+          error: "n8n returned an empty response. The workflow may have timed out or failed silently.",
+        });
+      } else {
+        // Ensure response is valid JSON
+        try {
+          JSON.parse(data);
+          result = data;
+        } catch {
+          console.log("Wrapping non-JSON response as JSON object");
+          result = JSON.stringify({ output: data });
+        }
+      }
+
+      // Write the actual response data and close
+      await writer.write(encoder.encode(result));
+      await writer.close();
+    } catch (fetchError) {
+      resolved = true;
+      clearInterval(keepaliveInterval);
+      console.error("n8n fetch error:", fetchError);
+      const errResult = JSON.stringify({ error: fetchError.message });
+      await writer.write(encoder.encode(errResult));
+      await writer.close();
     }
 
-    return new Response(data, {
+    return new Response(readable, {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
