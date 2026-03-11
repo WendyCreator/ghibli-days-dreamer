@@ -54,7 +54,7 @@ const LoadingView: React.FC = () => {
         Generating your content…
       </h2>
       <p className="font-ui text-sm text-muted-foreground mb-10 text-center">
-        This takes about 2–3 minutes
+        This takes about 2–3 minutes · <span className="font-medium text-foreground/70">{formatTime(elapsed)}</span> elapsed
       </p>
 
       {/* Progress bar */}
