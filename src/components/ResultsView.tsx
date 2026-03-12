@@ -247,6 +247,16 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
           </SectionCard>
         )}
 
+        {filtered.scenes.length > 0 && (
+          <SectionCard id="scenes" icon={Clapperboard} title="Scenes" count={filtered.scenes.length}>
+            <div className="space-y-3">
+              {filtered.scenes.map((scene, i) => (
+                <PromptCard key={i} prompt={scene} index={i} type="scene" />
+              ))}
+            </div>
+          </SectionCard>
+        )}
+
         {filtered.imagePrompts.length > 0 && (
           <SectionCard id="image-prompts" icon={Palette} title="Image Prompts" count={filtered.imagePrompts.length}>
             <div className="space-y-3">
