@@ -194,6 +194,9 @@ export function generateDownloadText(parsed: ParsedOutput): string {
   if (parsed.characters.length) {
     text += '── CHARACTERS ──\n\n' + parsed.characters.map(c => `${c.label}: ${c.description}`).join('\n\n') + '\n\n';
   }
+  if (parsed.scenes.length) {
+    text += '── SCENES ──\n\n' + parsed.scenes.map((s, i) => `${i + 1}. ${s}`).join('\n\n') + '\n\n';
+  }
   if (parsed.imagePrompts.length) {
     text += '── IMAGE PROMPTS ──\n\n' + parsed.imagePrompts.map((p, i) => `${i + 1}. ${p}`).join('\n\n') + '\n\n';
   }
