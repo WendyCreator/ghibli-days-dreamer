@@ -154,6 +154,10 @@ export function parseOutput(raw: string): ParsedOutput {
         }
         break;
       }
+      case 'scenes': {
+        result.scenes = parsePromptList(content);
+        break;
+      }
       case 'imagePrompts': {
         result.imagePrompts = parsePromptList(content);
         break;
