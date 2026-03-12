@@ -108,6 +108,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       titles: parsed.titles.filter(match),
       story: match(parsed.story) ? parsed.story : '',
       characters: parsed.characters.filter(c => match(c.label) || match(c.description)),
+      scenes: parsed.scenes.filter(match),
       imagePrompts: parsed.imagePrompts.filter(match),
       videoPrompts: parsed.videoPrompts.filter(match),
     };
