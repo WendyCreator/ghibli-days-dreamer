@@ -38,6 +38,7 @@ export function parseOutput(raw: string): ParsedOutput {
     titles: [],
     story: '',
     characters: [],
+    scenes: [],
     imagePrompts: [],
     videoPrompts: [],
     raw,
@@ -51,6 +52,7 @@ export function parseOutput(raw: string): ParsedOutput {
     { key: 'titles', patterns: [/(?:^|\n).*?TITLES?.*?\n/i] },
     { key: 'story', patterns: [/(?:^|\n).*?STORY.*?\n/i] },
     { key: 'characters', patterns: [/(?:^|\n).*?CHARACTERS?.*?\n/i] },
+    { key: 'scenes', patterns: [/(?:^|\n).*?SCENES?.*?\n/i, /(?:^|\n).*?SCENE\s*(?:GENERATION|DESCRIPTIONS?|BREAKDOWN).*?\n/i] },
     { key: 'imagePrompts', patterns: [/(?:^|\n).*?IMAGE\s*PROMPTS?.*?\n/i] },
     { key: 'videoPrompts', patterns: [/(?:^|\n).*?VIDEO\s*PROMPTS?.*?\n/i] },
     { key: 'channelDNA', patterns: [/(?:^|\n).*?CHANNEL\s*DNA.*?\n/i, /(?:^|\n).*?DNA\s*ANALYSIS.*?\n/i] },
@@ -152,6 +154,10 @@ export function parseOutput(raw: string): ParsedOutput {
         }
         break;
       }
+      case 'scenes': {
+        result.scenes = parsePromptList(content);
+        break;
+      }
       case 'imagePrompts': {
         result.imagePrompts = parsePromptList(content);
         break;
@@ -187,6 +193,9 @@ export function generateDownloadText(parsed: ParsedOutput): string {
   }
   if (parsed.characters.length) {
     text += '── CHARACTERS ──\n\n' + parsed.characters.map(c => `${c.label}: ${c.description}`).join('\n\n') + '\n\n';
+  }
+  if (parsed.scenes.length) {
+    text += '── SCENES ──\n\n' + parsed.scenes.map((s, i) => `${i + 1}. ${s}`).join('\n\n') + '\n\n';
   }
   if (parsed.imagePrompts.length) {
     text += '── IMAGE PROMPTS ──\n\n' + parsed.imagePrompts.map((p, i) => `${i + 1}. ${p}`).join('\n\n') + '\n\n';

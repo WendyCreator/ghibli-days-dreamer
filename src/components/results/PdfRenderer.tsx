@@ -126,6 +126,30 @@ const PdfRenderer = React.forwardRef<HTMLDivElement, PdfRendererProps>(({ parsed
         </div>
       )}
 
+      {/* Scenes */}
+      {parsed.scenes.length > 0 && (
+        <div style={{ padding: '40px 60px', pageBreakInside: 'avoid' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#6c5ce7', marginBottom: '16px', borderBottom: '2px solid #f0f0f5', paddingBottom: '8px' }}>
+            Scenes ({parsed.scenes.length})
+          </h2>
+          {parsed.scenes.map((s, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: '12px',
+              padding: '10px 16px', marginBottom: '6px',
+              background: '#f8f7ff', borderRadius: '8px', border: '1px solid #eee',
+            }}>
+              <span style={{
+                width: '24px', height: '24px', borderRadius: '50%',
+                background: '#6c5ce7', color: 'white',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '11px', fontWeight: 700, flexShrink: 0, marginTop: '2px',
+              }}>{i + 1}</span>
+              <p style={{ fontSize: '12px', lineHeight: '1.8', color: '#444', margin: 0 }}>{s}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Image Prompts */}
       {parsed.imagePrompts.length > 0 && (
         <div style={{ padding: '40px 60px', pageBreakInside: 'avoid' }}>

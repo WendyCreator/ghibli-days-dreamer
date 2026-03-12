@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X, FileText } from 'lucide-react';
+import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X, FileText, Clapperboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ParsedOutput } from '@/types';
@@ -24,6 +24,7 @@ const sectionNav = [
   { id: 'titles', label: 'Titles', icon: Sparkles },
   { id: 'story', label: 'Story', icon: BookOpen },
   { id: 'characters', label: 'Characters', icon: Users },
+  { id: 'scenes', label: 'Scenes', icon: Clapperboard },
   { id: 'image-prompts', label: 'Images', icon: Palette },
   { id: 'video-prompts', label: 'Videos', icon: Film },
 ];
@@ -107,12 +108,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
       titles: parsed.titles.filter(match),
       story: match(parsed.story) ? parsed.story : '',
       characters: parsed.characters.filter(c => match(c.label) || match(c.description)),
+      scenes: parsed.scenes.filter(match),
       imagePrompts: parsed.imagePrompts.filter(match),
       videoPrompts: parsed.videoPrompts.filter(match),
     };
   }, [parsed, searchQuery]);
 
-  const totalResults = filtered.titles.length + filtered.imagePrompts.length + filtered.videoPrompts.length + filtered.characters.length + (filtered.story ? 1 : 0) + (filtered.channelDNA ? 1 : 0);
+  const totalResults = filtered.titles.length + filtered.scenes.length + filtered.imagePrompts.length + filtered.videoPrompts.length + filtered.characters.length + (filtered.story ? 1 : 0) + (filtered.channelDNA ? 1 : 0);
 
   const handleCopyAll = useCallback(() => {
     navigator.clipboard.writeText(parsed.raw);
@@ -240,6 +242,16 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.characters.map((char, i) => (
                 <CharacterCard key={i} char={char} />
+              ))}
+            </div>
+          </SectionCard>
+        )}
+
+        {filtered.scenes.length > 0 && (
+          <SectionCard id="scenes" icon={Clapperboard} title="Scenes" count={filtered.scenes.length}>
+            <div className="space-y-3">
+              {filtered.scenes.map((scene, i) => (
+                <PromptCard key={i} prompt={scene} index={i} type="scene" />
               ))}
             </div>
           </SectionCard>

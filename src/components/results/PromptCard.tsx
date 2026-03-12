@@ -1,21 +1,21 @@
 import React from 'react';
-import { Image, Film, Layers } from 'lucide-react';
+import { Image, Film, Layers, Clapperboard } from 'lucide-react';
 import CopyButton from './CopyButton';
 
 interface PromptCardProps {
   prompt: string;
   index: number;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'scene';
   pairedPrompt?: string;
 }
 
 const PromptCard: React.FC<PromptCardProps> = ({ prompt, index, type, pairedPrompt }) => {
-  const cleaned = prompt.replace(/^(?:Image|Video)\s*(?:Prompt\s*)?\d+\s*[:.]?\s*/i, '').trim();
+  const cleaned = prompt.replace(/^(?:Image|Video|Scene)\s*(?:Prompt\s*)?\d+\s*[:.]?\s*/i, '').trim();
   const firstBreak = cleaned.indexOf('\n');
   const title = firstBreak > 0 ? cleaned.slice(0, firstBreak).trim() : '';
   const body = firstBreak > 0 ? cleaned.slice(firstBreak).trim() : cleaned;
 
-  const Icon = type === 'image' ? Image : Film;
+  const Icon = type === 'image' ? Image : type === 'video' ? Film : Clapperboard;
 
   const pairedText = pairedPrompt
     ? `--- Image Prompt ${index + 1} ---\n${prompt}\n\n--- Video Prompt ${index + 1} ---\n${pairedPrompt}`
@@ -35,7 +35,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, index, type, pairedProm
             <div className="flex items-center gap-1.5">
               <Icon className="h-3 w-3 text-muted-foreground shrink-0" />
               <span className="font-ui text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
-                {type === 'image' ? 'Image' : 'Video'} Prompt
+                {type === 'image' ? 'Image' : type === 'video' ? 'Video' : 'Scene'} Prompt
               </span>
             </div>
           </div>

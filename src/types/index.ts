@@ -11,6 +11,7 @@ export interface ParsedOutput {
   titles: string[];
   story: string;
   characters: { label: string; description: string }[];
+  scenes: string[];
   imagePrompts: string[];
   videoPrompts: string[];
   raw: string;
