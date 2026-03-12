@@ -52,6 +52,7 @@ export function parseOutput(raw: string): ParsedOutput {
     { key: 'titles', patterns: [/(?:^|\n).*?TITLES?.*?\n/i] },
     { key: 'story', patterns: [/(?:^|\n).*?STORY.*?\n/i] },
     { key: 'characters', patterns: [/(?:^|\n).*?CHARACTERS?.*?\n/i] },
+    { key: 'scenes', patterns: [/(?:^|\n).*?SCENES?.*?\n/i, /(?:^|\n).*?SCENE\s*(?:GENERATION|DESCRIPTIONS?|BREAKDOWN).*?\n/i] },
     { key: 'imagePrompts', patterns: [/(?:^|\n).*?IMAGE\s*PROMPTS?.*?\n/i] },
     { key: 'videoPrompts', patterns: [/(?:^|\n).*?VIDEO\s*PROMPTS?.*?\n/i] },
     { key: 'channelDNA', patterns: [/(?:^|\n).*?CHANNEL\s*DNA.*?\n/i, /(?:^|\n).*?DNA\s*ANALYSIS.*?\n/i] },
