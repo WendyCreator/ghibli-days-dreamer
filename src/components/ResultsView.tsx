@@ -114,7 +114,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ parsed, timestamp, onReset })
     };
   }, [parsed, searchQuery]);
 
-  const totalResults = filtered.titles.length + filtered.imagePrompts.length + filtered.videoPrompts.length + filtered.characters.length + (filtered.story ? 1 : 0) + (filtered.channelDNA ? 1 : 0);
+  const totalResults = filtered.titles.length + filtered.scenes.length + filtered.imagePrompts.length + filtered.videoPrompts.length + filtered.characters.length + (filtered.story ? 1 : 0) + (filtered.channelDNA ? 1 : 0);
 
   const handleCopyAll = useCallback(() => {
     navigator.clipboard.writeText(parsed.raw);
