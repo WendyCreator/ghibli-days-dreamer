@@ -35,7 +35,7 @@ const PromptCard: React.FC<PromptCardProps> = ({ prompt, index, type, pairedProm
             <div className="flex items-center gap-1.5">
               <Icon className="h-3 w-3 text-muted-foreground shrink-0" />
               <span className="font-ui text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
-                {type === 'image' ? 'Image' : 'Video'} Prompt
+                {type === 'image' ? 'Image' : type === 'video' ? 'Video' : 'Scene'} Prompt
               </span>
             </div>
           </div>
