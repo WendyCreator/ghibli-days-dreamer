@@ -32,17 +32,16 @@ Deno.serve(async (req) => {
     });
 
     // Send keepalive pings every 15 seconds to prevent connection timeout
-    let resolved = false;
     const keepaliveInterval = setInterval(async () => {
       if (!resolved) {
         try {
           await writer.write(encoder.encode(" "));
+          console.log("Keepalive ping sent");
         } catch {
-          // Writer closed, stop pinging
           clearInterval(keepaliveInterval);
         }
       }
-    }, 15000);
+    }, 10000);
 
     // Wait for n8n response
     try {

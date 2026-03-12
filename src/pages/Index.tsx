@@ -92,7 +92,7 @@ const Index: React.FC = () => {
       if (err.name === 'AbortError') {
         toast({
           title: 'Request timed out',
-          description: 'The generation took too long (>5 minutes).',
+          description: 'The generation took too long (>8 minutes). Scene generation may need more time.',
           variant: 'destructive',
           action: <button onClick={retry} className="shrink-0 rounded-md bg-destructive-foreground/20 px-3 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive-foreground/30 transition-colors">Retry</button>,
         });
