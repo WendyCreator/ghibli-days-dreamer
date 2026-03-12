@@ -31,7 +31,9 @@ Deno.serve(async (req) => {
       body,
     });
 
-    // Send keepalive pings every 15 seconds to prevent connection timeout
+    let resolved = false;
+
+    // Send keepalive pings every 10 seconds to prevent connection timeout
     const keepaliveInterval = setInterval(async () => {
       if (!resolved) {
         try {
