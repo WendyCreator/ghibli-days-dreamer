@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X, FileText } from 'lucide-react';
+import { Copy, Download, RotateCcw, Dna, Sparkles, BookOpen, Users, Palette, Film, Search, X, FileText, Clapperboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ParsedOutput } from '@/types';
