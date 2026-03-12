@@ -38,6 +38,7 @@ export function parseOutput(raw: string): ParsedOutput {
     titles: [],
     story: '',
     characters: [],
+    scenes: [],
     imagePrompts: [],
     videoPrompts: [],
     raw,
