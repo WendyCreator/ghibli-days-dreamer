@@ -24,6 +24,7 @@ const sectionNav = [
   { id: 'titles', label: 'Titles', icon: Sparkles },
   { id: 'story', label: 'Story', icon: BookOpen },
   { id: 'characters', label: 'Characters', icon: Users },
+  { id: 'scenes', label: 'Scenes', icon: Clapperboard },
   { id: 'image-prompts', label: 'Images', icon: Palette },
   { id: 'video-prompts', label: 'Videos', icon: Film },
 ];
