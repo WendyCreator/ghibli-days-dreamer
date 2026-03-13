@@ -12,15 +12,15 @@ interface SectionCardProps {
 
 const SectionCard: React.FC<SectionCardProps> = ({ id, icon: Icon, title, count, children, actions }) => {
   return (
-    <section id={id} className="rounded-xl border border-border/60 bg-card overflow-hidden shadow-sm">
+    <section id={id} className="parchment rounded-xl overflow-hidden shadow-sm">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border/40">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-accent shrink-0">
-            <Icon className="h-4 w-4 text-accent-foreground" />
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-ochre/10 shrink-0">
+            <Icon className="h-4 w-4 text-ochre" />
           </div>
           <h3 className="font-display text-sm sm:text-[15px] font-semibold text-foreground truncate">{title}</h3>
           {count !== undefined && (
-            <span className="inline-flex items-center justify-center h-5 min-w-[22px] rounded-full bg-primary/10 px-1.5 font-ui text-[11px] font-bold text-primary">
+            <span className="inline-flex items-center justify-center h-5 min-w-[22px] rounded-full bg-ochre/10 px-1.5 font-ui text-[11px] font-bold text-ochre">
               {count}
             </span>
           )}
