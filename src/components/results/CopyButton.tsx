@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface CopyButtonProps {
   text: string;
@@ -14,17 +15,18 @@ const CopyButton: React.FC<CopyButtonProps> = ({ text, label, size = 'sm', icon 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(text);
     setCopied(true);
+    toast({ title: '✓ Copied to clipboard' });
     setTimeout(() => setCopied(false), 2000);
   }, [text]);
 
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 transition-all hover:bg-accent hover:border-primary/20 ${
+      className={`inline-flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 transition-all hover:bg-ochre/10 hover:border-ochre/20 hover:text-ochre ${
         size === 'md' ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs'
-      } font-ui text-muted-foreground hover:text-foreground shrink-0`}
+      } font-ui text-muted-foreground shrink-0`}
     >
-      {copied ? <Check className="h-3 w-3 text-primary" /> : (icon || <Copy className="h-3 w-3" />)}
+      {copied ? <Check className="h-3 w-3 text-forest" /> : (icon || <Copy className="h-3 w-3" />)}
       {label || (copied ? 'Copied!' : 'Copy')}
     </button>
   );

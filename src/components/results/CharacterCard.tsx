@@ -1,5 +1,4 @@
 import React from 'react';
-import { User } from 'lucide-react';
 import CopyButton from './CopyButton';
 
 interface CharacterCardProps {
@@ -8,17 +7,22 @@ interface CharacterCardProps {
 
 const CharacterCard: React.FC<CharacterCardProps> = ({ char }) => {
   return (
-    <div className="rounded-xl border border-border/40 bg-background p-4 space-y-2.5 transition-all hover:border-primary/20 hover:shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center h-9 w-9 rounded-full bg-accent">
-            <User className="h-4 w-4 text-accent-foreground" />
-          </div>
-          <span className="font-display text-sm font-semibold text-foreground">{char.label}</span>
-        </div>
+    <div className="parchment rounded-xl p-5 space-y-3 transition-all hover:shadow-md relative overflow-hidden">
+      {/* Watermark silhouette */}
+      <svg className="absolute bottom-2 right-2 w-16 h-20 text-ochre/5" viewBox="0 0 40 50" fill="currentColor">
+        <ellipse cx="20" cy="12" rx="8" ry="10" />
+        <path d="M10 22 C10 22 8 50 20 50 C32 50 30 22 30 22" />
+      </svg>
+
+      <div className="flex items-start justify-between relative z-10">
+        <h4 className="font-display text-base font-semibold text-foreground">{char.label}</h4>
         <CopyButton text={`${char.label}: ${char.description}`} />
       </div>
-      <p className="font-body text-[13px] leading-[1.8] text-muted-foreground pl-[46px]">
+
+      {/* Ink divider */}
+      <div className="h-px bg-gradient-to-r from-ochre/20 via-ochre/10 to-transparent" />
+
+      <p className="font-body text-[13px] leading-[1.85] text-muted-foreground relative z-10">
         {char.description}
       </p>
     </div>

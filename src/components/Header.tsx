@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Settings, Sparkles, Moon, Sun } from 'lucide-react';
+import { Settings, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -48,15 +48,13 @@ const Header: React.FC<HeaderProps> = ({ onReset, onRerun, onViewResult }) => {
     <header className="relative z-10 px-4 py-4 sm:px-6 sm:py-5 md:px-12">
       <div className="mx-auto flex max-w-4xl items-center justify-between">
         <button onClick={onReset} className="group flex items-center gap-2.5 text-left min-w-0">
-          <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-primary/10 shrink-0 transition-transform group-hover:scale-105">
-            <Sparkles className="h-4.5 w-4.5 text-primary" />
-          </div>
+          <span className="text-xl group-hover:scale-110 transition-transform">🍃</span>
           <div className="min-w-0">
             <h1 className="font-display text-lg sm:text-xl font-bold leading-tight tracking-tight text-foreground truncate">
-              Ghibli Days
+              Ghibli Days Studio
             </h1>
             <p className="font-ui text-[10px] sm:text-[11px] tracking-wider text-muted-foreground uppercase font-medium">
-              Content Generator
+              Content Pipeline
             </p>
           </div>
         </button>
