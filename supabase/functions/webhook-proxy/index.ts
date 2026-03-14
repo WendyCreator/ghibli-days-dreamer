@@ -19,7 +19,6 @@ Deno.serve(async (req) => {
 
     console.log("Proxying to n8n, content-type:", contentType, "body size:", body.byteLength);
 
-    // Use a ReadableStream to send keepalive pings while waiting for n8n
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
@@ -31,65 +30,70 @@ Deno.serve(async (req) => {
       body,
     });
 
-    let resolved = false;
+    // Populate the stream asynchronously (don't await here — return response immediately)
+    (async () => {
+      let keepaliveInterval: number | undefined;
+      try {
+        // Send keepalive pings every 8 seconds to prevent connection timeout
+        keepaliveInterval = setInterval(async () => {
+          try {
+            await writer.write(encoder.encode(" "));
+            console.log("Keepalive ping sent");
+          } catch {
+            // writer closed, stop pinging
+            clearInterval(keepaliveInterval);
+          }
+        }, 8000);
 
-    // Send keepalive pings every 10 seconds to prevent connection timeout
-    const keepaliveInterval = setInterval(async () => {
-      if (!resolved) {
+        // Send first ping immediately
+        await writer.write(encoder.encode(" "));
+
+        const response = await n8nPromise;
+        clearInterval(keepaliveInterval);
+
+        const data = await response.text();
+        console.log("n8n response status:", response.status, "body length:", data.length);
+
+        let result: string;
+
+        if (!response.ok) {
+          console.error(`n8n returned ${response.status}: ${data}`);
+          result = JSON.stringify({
+            error: `n8n webhook error (${response.status})`,
+            details: data,
+          });
+        } else if (!data || data.trim().length === 0) {
+          console.error("n8n returned empty response");
+          result = JSON.stringify({
+            error: "n8n returned an empty response. The workflow may have timed out or failed silently.",
+          });
+        } else {
+          // Ensure response is valid JSON
+          try {
+            JSON.parse(data);
+            result = data;
+          } catch {
+            console.log("Wrapping non-JSON response as JSON object");
+            result = JSON.stringify({ output: data });
+          }
+        }
+
+        await writer.write(encoder.encode(result));
+        await writer.close();
+      } catch (fetchError) {
+        if (keepaliveInterval) clearInterval(keepaliveInterval);
+        console.error("n8n fetch error:", fetchError);
         try {
-          await writer.write(encoder.encode(" "));
-          console.log("Keepalive ping sent");
+          const errResult = JSON.stringify({ error: fetchError.message });
+          await writer.write(encoder.encode(errResult));
+          await writer.close();
         } catch {
-          clearInterval(keepaliveInterval);
+          // writer already closed
         }
       }
-    }, 10000);
+    })();
 
-    // Wait for n8n response
-    try {
-      const response = await n8nPromise;
-      resolved = true;
-      clearInterval(keepaliveInterval);
-
-      const data = await response.text();
-      console.log("n8n response status:", response.status, "body length:", data.length);
-
-      let result: string;
-
-      if (!response.ok) {
-        console.error(`n8n returned ${response.status}: ${data}`);
-        result = JSON.stringify({
-          error: `n8n webhook error (${response.status})`,
-          details: data,
-        });
-      } else if (!data || data.trim().length === 0) {
-        console.error("n8n returned empty response");
-        result = JSON.stringify({
-          error: "n8n returned an empty response. The workflow may have timed out or failed silently.",
-        });
-      } else {
-        // Ensure response is valid JSON
-        try {
-          JSON.parse(data);
-          result = data;
-        } catch {
-          console.log("Wrapping non-JSON response as JSON object");
-          result = JSON.stringify({ output: data });
-        }
-      }
-
-      // Write the actual response data and close
-      await writer.write(encoder.encode(result));
-      await writer.close();
-    } catch (fetchError) {
-      resolved = true;
-      clearInterval(keepaliveInterval);
-      console.error("n8n fetch error:", fetchError);
-      const errResult = JSON.stringify({ error: fetchError.message });
-      await writer.write(encoder.encode(errResult));
-      await writer.close();
-    }
-
+    // Return the streaming response IMMEDIATELY so client stays connected
     return new Response(readable, {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
